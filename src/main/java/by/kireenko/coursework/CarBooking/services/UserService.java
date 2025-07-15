@@ -64,9 +64,7 @@ public class UserService {
     }
 
     public List<Booking> getCurrentUserBookingList(User user) {
-        User currUser = userRepository.findById(user.getId()).orElseThrow(
-                () -> new ResourceNotFoundException("User", "id", user.getId())
-        );
+        User currUser = getUserById(user.getId());
         return currUser.getBookings();
     }
 }

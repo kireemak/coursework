@@ -51,8 +51,7 @@ public class CarService {
     }
 
     public boolean isCarAvailable(Long carId) {
-        Car car = carRepository.findById(carId)
-                .orElseThrow(() -> new ResourceNotFoundException("Car", "id", carId));
+        Car car = getCarById(carId);
         return "Available".equalsIgnoreCase(car.getStatus());
     }
 

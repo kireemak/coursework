@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.services;
 
+import by.kireenko.coursework.CarBooking.error.NotValidResourceState;
 import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Booking;
 import by.kireenko.coursework.CarBooking.models.Car;
@@ -33,10 +34,9 @@ public class BookingService {
 
     public Booking getBookingById(Long id) {
         User user = userService.getCurrentAuthenticatedUser();
-        Booking booking = getBookingById(id);
-
-        if(booking == null)
-            throw new EntityNotFoundException("Booking not found with id:" + id);
+        Booking booking = bookingRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Booking", "id", id)
+        );
 
         if (!booking.getUser().getId().equals(user.getId()) &&
         !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
@@ -100,7 +100,7 @@ public class BookingService {
         }
 
         if (!"Available".equalsIgnoreCase(car.getStatus())) {
-            throw new RuntimeException("Car is not available for booking.");
+            throw new NotValidResourceState("Car is not available for booking.");
         }
 
         car.setStatus("Rented");
@@ -111,7 +111,7 @@ public class BookingService {
     @Transactional(readOnly = false)
     public Booking completeBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
+                .orElseThrow(() -> new ResourceNotFoundException("Booking", "id", bookingId));
         Car car = booking.getCar();
         car.setStatus("Available");
         carService.createCar(car);
