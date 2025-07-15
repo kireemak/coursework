@@ -1,39 +1,42 @@
 package by.kireenko.coursework.CarBooking.services;
 
+import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Booking;
 import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.repositories.BookingRepository;
-import by.kireenko.coursework.CarBooking.repositories.CarRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
 public class BookingService {
     private final UserService userService;
+    private final CarService carService;
     private final BookingRepository bookingRepository;
-    private final CarRepository carRepository;
 
     @Autowired
-    public BookingService(BookingRepository bookingRepository, CarRepository carRepository, UserService userService) {
+    public BookingService(BookingService bookingService, CarService carService, UserService userService, BookingRepository bookingRepository) {
         this.userService = userService;
+        this.carService = carService;
         this.bookingRepository = bookingRepository;
-        this.carRepository = carRepository;
     }
 
     public List<Booking> getBookingsByUser(User user) {
-        return bookingRepository.findByUserId(user.getId());
+        return userService.getCurrentUserBookingList(user);
     }
 
     public Booking getBookingById(Long id) {
         User user = userService.getCurrentAuthenticatedUser();
-        Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Booking not found with id:" + id));
+        Booking booking = getBookingById(id);
+
+        if(booking == null)
+            throw new EntityNotFoundException("Booking not found with id:" + id);
 
         if (!booking.getUser().getId().equals(user.getId()) &&
         !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
@@ -52,7 +55,18 @@ public class BookingService {
 
     @Transactional(readOnly = false)
     public Booking updateBooking(Long id, Booking updatedBooking) {
+        User user = userService.getCurrentAuthenticatedUser();
         Booking existingBooking = getBookingById(id);
+
+        if (!existingBooking.getUser().getId().equals(user.getId()) &&
+                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
+            throw new AccessDeniedException("You can't update this booking");
+        }
+
+        if (!existingBooking.getStatus().equals("Created")) {
+            throw new IllegalStateException("Only bookings with status CREATED can be updated");
+        }
+
         existingBooking.setStartDate(updatedBooking.getStartDate());
         existingBooking.setEndDate(updatedBooking.getEndDate());
         existingBooking.setStatus(updatedBooking.getStatus());
@@ -63,19 +77,34 @@ public class BookingService {
 
     @Transactional(readOnly = false)
     public void deleteBooking(Long id) {
+        User user = userService.getCurrentAuthenticatedUser();
+        Booking booking = getBookingById(id);
+
+        if (!booking.getUser().getId().equals(user.getId()) &&
+                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
+            throw new AccessDeniedException("You can't delete this booking");
+        }
+
+        if (!(booking.getStatus().equals("Created") || booking.getStatus().equals("Cancelled"))) {
+            throw new IllegalStateException("Only CREATED or CANCELLED bookings can be deleted");
+        }
+
         bookingRepository.deleteById(id);
     }
 
     @Transactional(readOnly = false)
     public Booking createBookingWithCheck(Booking booking) {
-        Car car = carRepository.findById(booking.getCar().getId())
-                .orElseThrow(() -> new RuntimeException("Car not found with id: " + booking.getCar().getId()));
+        Car car = carService.getCarById(booking.getCar().getId());
+        if (car == null) {
+            throw new ResourceNotFoundException("Car", "id", booking.getCar().getId());
+        }
+
         if (!"Available".equalsIgnoreCase(car.getStatus())) {
             throw new RuntimeException("Car is not available for booking.");
         }
 
         car.setStatus("Rented");
-        carRepository.save(car);
+        carService.createCar(car);
         return bookingRepository.save(booking);
     }
 
@@ -85,7 +114,7 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Booking not found with id: " + bookingId));
         Car car = booking.getCar();
         car.setStatus("Available");
-        carRepository.save(car);
+        carService.createCar(car);
         booking.setStatus("Completed");
         return bookingRepository.save(booking);
     }
