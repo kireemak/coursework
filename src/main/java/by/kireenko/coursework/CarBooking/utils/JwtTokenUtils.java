@@ -3,6 +3,7 @@ package by.kireenko.coursework.CarBooking.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -14,7 +15,8 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenUtils {
 
-    private String secret = "123idbjadflkgjasopi39pi90r8qeiq3peoe0riwkototpw48f9jzfku4w09fuaefjmlyzseu9dip";
+    @Value("${jwt.secret}")
+    private String secret;
     private Duration jwtLifetime = Duration.ofMinutes(30);
 
     public String generateToken(UserDetails userDetails) {
