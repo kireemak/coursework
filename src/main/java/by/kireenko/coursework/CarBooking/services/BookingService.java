@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,13 +23,13 @@ public class BookingService {
     private final BookingRepository bookingRepository;
 
     @Autowired
-    public BookingService(BookingService bookingService, CarService carService, UserService userService, BookingRepository bookingRepository) {
+    public BookingService(CarService carService, UserService userService, BookingRepository bookingRepository) {
         this.userService = userService;
         this.carService = carService;
         this.bookingRepository = bookingRepository;
     }
 
-    public List<Booking> getBookingsByUser(User user) {
+    public Set<Booking> getBookingsByUser(User user) {
         return userService.getCurrentUserBookingList(user);
     }
 
