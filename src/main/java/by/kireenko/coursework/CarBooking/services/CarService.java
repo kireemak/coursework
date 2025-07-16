@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.services;
 
+import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.repositories.CarRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class CarService {
 
     public Car getCarById(Long id) {
         return carRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Car not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Car", "id", id));
     }
 
     @Transactional(readOnly = false)
@@ -50,8 +51,7 @@ public class CarService {
     }
 
     public boolean isCarAvailable(Long carId) {
-        Car car = carRepository.findById(carId)
-                .orElseThrow(() -> new RuntimeException("Car not found with id: " + carId));
+        Car car = getCarById(carId);
         return "Available".equalsIgnoreCase(car.getStatus());
     }
 

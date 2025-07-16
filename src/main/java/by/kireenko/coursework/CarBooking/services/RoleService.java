@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.services;
 
+import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Role;
 import by.kireenko.coursework.CarBooking.repositories.RoleRepository;
 import lombok.RequiredArgsConstructor;

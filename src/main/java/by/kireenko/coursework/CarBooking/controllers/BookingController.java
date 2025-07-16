@@ -42,35 +42,11 @@ public class BookingController {
 
     @PutMapping("/{id}")
     public Booking updateBooking(@PathVariable Long id, @RequestBody Booking updatedBooking) {
-        User user = userService.getCurrentAuthenticatedUser();
-        Booking existingBooking = bookingService.getBookingById(id);
-
-        if (!existingBooking.getUser().getId().equals(user.getId()) &&
-                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
-            throw new AccessDeniedException("You can't update this booking");
-        }
-
-        if (!existingBooking.getStatus().equals("Created")) {
-            throw new IllegalStateException("Only bookings with status CREATED can be updated");
-        }
-
         return bookingService.updateBooking(id, updatedBooking);
     }
 
     @DeleteMapping("/{id}")
     public void deleteBooking(@PathVariable Long id) {
-        User user = userService.getCurrentAuthenticatedUser();
-        Booking booking = bookingService.getBookingById(id);
-
-        if (!booking.getUser().getId().equals(user.getId()) &&
-                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
-            throw new AccessDeniedException("You can't delete this booking");
-        }
-
-        if (!(booking.getStatus().equals("Created") || booking.getStatus().equals("Cancelled"))) {
-            throw new IllegalStateException("Only CREATED or CANCELLED bookings can be deleted");
-        }
-
         bookingService.deleteBooking(id);
     }
 

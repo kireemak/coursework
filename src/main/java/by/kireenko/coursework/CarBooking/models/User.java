@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -31,5 +32,9 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Collection<Role> roles;
+    private List<Role> roles;
+
+    @OneToMany
+    @JoinColumn(name = "user_id")
+    private List<Booking> bookings;
 }

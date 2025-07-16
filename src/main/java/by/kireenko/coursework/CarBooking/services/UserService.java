@@ -1,5 +1,7 @@
 package by.kireenko.coursework.CarBooking.services;
 
+import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
+import by.kireenko.coursework.CarBooking.models.Booking;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -30,7 +33,7 @@ public class UserService {
 
     public User getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
     }
 
     @Transactional(readOnly = false)
@@ -58,5 +61,10 @@ public class UserService {
         String username = authentication.getName();
         return userRepository.findByName(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    public List<Booking> getCurrentUserBookingList(User user) {
+        User currUser = getUserById(user.getId());
+        return currUser.getBookings();
     }
 }
