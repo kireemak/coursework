@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -63,7 +64,7 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    public List<Booking> getCurrentUserBookingList(User user) {
+    public Set<Booking> getCurrentUserBookingList(User user) {
         User currUser = getUserById(user.getId());
         return currUser.getBookings();
     }

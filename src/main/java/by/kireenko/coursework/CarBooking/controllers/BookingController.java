@@ -9,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -24,7 +25,7 @@ public class BookingController {
     }
 
     @GetMapping
-    public List<Booking> getBookingsByUser() {
+    public Set<Booking> getBookingsByUser() {
         User user = userService.getCurrentAuthenticatedUser();
         return bookingService.getBookingsByUser(user);
     }

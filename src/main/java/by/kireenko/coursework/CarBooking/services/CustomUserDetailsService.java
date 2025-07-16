@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,7 +46,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         user.setPassword(registrationUserDto.getPassword());
         user.setEmail(registrationUserDto.getEmail());
         user.setPhoneNumber(registrationUserDto.getPhone());
-        user.setRoles(List.of(roleService.getUserRole()));
+        user.setRoles(Set.of(roleService.getUserRole()));
         return userService.createUser(user);
     }
 
@@ -55,7 +56,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         user.setPassword(registrationUserDto.getPassword());
         user.setEmail(registrationUserDto.getEmail());
         user.setPhoneNumber(registrationUserDto.getPhone());
-        user.setRoles(List.of(roleService.getAdminRole()));
+        user.setRoles(Set.of(roleService.getAdminRole()));
         return userService.createUser(user);
     }
 }
