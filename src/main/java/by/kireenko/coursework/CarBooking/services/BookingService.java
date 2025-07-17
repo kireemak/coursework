@@ -12,7 +12,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -39,8 +38,7 @@ public class BookingService {
                 () -> new ResourceNotFoundException("Booking", "id", id)
         );
 
-        if (!booking.getUser().getId().equals(user.getId()) &&
-        !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
+        if (validateAccess(booking, user)) {
             throw new AccessDeniedException("You are not allowed to view this booking");
         }
 
@@ -59,8 +57,7 @@ public class BookingService {
         User user = userService.getCurrentAuthenticatedUser();
         Booking existingBooking = getBookingById(id);
 
-        if (!existingBooking.getUser().getId().equals(user.getId()) &&
-                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
+        if (validateAccess(existingBooking, user)) {
             throw new AccessDeniedException("You can't update this booking");
         }
 
@@ -81,8 +78,7 @@ public class BookingService {
         User user = userService.getCurrentAuthenticatedUser();
         Booking booking = getBookingById(id);
 
-        if (!booking.getUser().getId().equals(user.getId()) &&
-                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
+        if (validateAccess(booking, user)) {
             throw new AccessDeniedException("You can't delete this booking");
         }
 
@@ -118,5 +114,10 @@ public class BookingService {
         carService.createCar(car);
         booking.setStatus("Completed");
         return bookingRepository.save(booking);
+    }
+
+    private static boolean validateAccess(Booking booking, User user) {
+        return !booking.getUser().getId().equals(user.getId()) &&
+                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
     }
 }
