@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.controllers;
 
+import by.kireenko.coursework.CarBooking.dto.UserDto;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,26 +21,26 @@ public class UserController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public List<UserDto> getAllUsers() {
+        return userService.getAllUsersDto();
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public UserDto getUserById(@PathVariable Long id) {
+        return new UserDto(userService.getUserById(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public UserDto createUser(@RequestBody User user) {
+        return new UserDto(userService.createUser(user));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) {
-        return userService.updateUser(id, user);
+    public UserDto updateUser(@PathVariable Long id, @RequestBody User user) {
+        return new UserDto(userService.updateUser(id, user));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

@@ -19,10 +19,6 @@ public class AccountController {
     @GetMapping("/me")
     public UserDto getCurrentUserInfo(Principal principal) {
         String username = principal.getName();
-        User user = userService.getUserByName(username);
-
-        UserDto userDto = new UserDto(user.getId(), user.getName(), user.getEmail(), user.getPhoneNumber());
-
-        return userDto;
+        return new UserDto(userService.getUserByName(username));
     }
 }

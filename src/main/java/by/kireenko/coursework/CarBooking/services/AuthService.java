@@ -4,6 +4,8 @@ import by.kireenko.coursework.CarBooking.dto.JwtRequest;
 import by.kireenko.coursework.CarBooking.dto.JwtResponse;
 import by.kireenko.coursework.CarBooking.dto.RegistrationUserDto;
 import by.kireenko.coursework.CarBooking.error.AppError;
+import by.kireenko.coursework.CarBooking.error.MismatchedPasswordsException;
+import by.kireenko.coursework.CarBooking.error.UserAlreadyExistsException;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.utils.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +28,7 @@ public class AuthService {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(jwtRequest.getName(), jwtRequest.getPassword()));
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>(new AppError(HttpStatus.UNAUTHORIZED.value(),
-                    "Неправильный логин или пароль"), HttpStatus.UNAUTHORIZED);
+            throw new BadCredentialsException("Неправильный логин или пароль");
         }
 
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(jwtRequest.getName());
@@ -37,12 +38,10 @@ public class AuthService {
 
     public ResponseEntity<?> createNewUser(RegistrationUserDto registrationUserDto) {
         if (!registrationUserDto.getPassword().equals(registrationUserDto.getConfirmPassword())) {
-            return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(), "Пароли не совпадают"),
-                    HttpStatus.BAD_REQUEST);
+            throw new MismatchedPasswordsException("Пароли не совпадают");
         }
         if (customUserDetailsService.loadUserByUsername(registrationUserDto.getName()) != null) {
-            return new ResponseEntity<>(new AppError(HttpStatus.BAD_REQUEST.value(),
-                    "Пользователь с указанным именем уже существует"), HttpStatus.BAD_REQUEST);
+            throw new UserAlreadyExistsException("Пользователь с указанным именем уже существует");
         }
 
         User user = customUserDetailsService.createNewUser(registrationUserDto);
