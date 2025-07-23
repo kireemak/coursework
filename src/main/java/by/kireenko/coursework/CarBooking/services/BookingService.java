@@ -118,6 +118,6 @@ public class BookingService {
 
     private static boolean validateAccess(Booking booking, User user) {
         return !booking.getUser().getId().equals(user.getId()) &&
-                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
+                user.getRoles().stream().noneMatch(role -> role.getName().equals("ROLE_ADMIN"));
     }
 }
