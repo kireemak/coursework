@@ -3,7 +3,7 @@ package by.kireenko.coursework.CarBooking.error;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
+@ResponseStatus(HttpStatus.FORBIDDEN)
 public class NotValidResourceState extends RuntimeException {
     public NotValidResourceState(String message) {
         super(message);

@@ -46,9 +46,13 @@ public class BookingService {
     }
 
     @Transactional(readOnly = false)
-    public Booking createBooking(Booking booking, User user) {
+    public Booking createBooking(Booking booking) {
+        User user = userService.getCurrentAuthenticatedUser();
         booking.setUser(user);
-        booking.setStatus("Created");
+        if(booking.getStatus() == null) {
+            booking.setStatus("Created");
+        }
+
         return bookingRepository.save(booking);
     }
 
@@ -65,11 +69,17 @@ public class BookingService {
             throw new IllegalStateException("Only bookings with status CREATED can be updated");
         }
 
-        existingBooking.setStartDate(updatedBooking.getStartDate());
-        existingBooking.setEndDate(updatedBooking.getEndDate());
-        existingBooking.setStatus(updatedBooking.getStatus());
-        existingBooking.setCar(updatedBooking.getCar());
-        existingBooking.setUser(updatedBooking.getUser());
+        if (updatedBooking.getStartDate() != null)
+            existingBooking.setStartDate(updatedBooking.getStartDate());
+        if (updatedBooking.getEndDate() != null)
+            existingBooking.setEndDate(updatedBooking.getEndDate());
+        if (updatedBooking.getStatus() != null)
+            existingBooking.setStatus(updatedBooking.getStatus());
+        if (updatedBooking.getCar() != null)
+            existingBooking.setCar(updatedBooking.getCar());
+        if (updatedBooking.getUser() != null)
+            existingBooking.setUser(updatedBooking.getUser());
+
         return bookingRepository.save(existingBooking);
     }
 
@@ -102,7 +112,8 @@ public class BookingService {
 
         car.setStatus("Rented");
         carService.createCar(car);
-        return bookingRepository.save(booking);
+
+        return createBooking(booking);
     }
 
     @Transactional(readOnly = false)
@@ -118,6 +129,6 @@ public class BookingService {
 
     private static boolean validateAccess(Booking booking, User user) {
         return !booking.getUser().getId().equals(user.getId()) &&
-                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"));
+                user.getRoles().stream().noneMatch(role -> role.getName().equals("ROLE_ADMIN"));
     }
 }
