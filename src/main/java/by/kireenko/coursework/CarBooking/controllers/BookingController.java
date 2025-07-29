@@ -6,11 +6,15 @@ import by.kireenko.coursework.CarBooking.services.BookingService;
 import by.kireenko.coursework.CarBooking.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.List;
 import java.util.Set;
 
+@EnableWebMvc
+@Controller
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
@@ -37,8 +41,7 @@ public class BookingController {
 
     @PostMapping
     public Booking createBooking(@RequestBody Booking booking) {
-        User user = userService.getCurrentAuthenticatedUser();
-        return bookingService.createBooking(booking, user);
+        return bookingService.createBooking(booking);
     }
 
     @PutMapping("/{id}")

@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,12 +21,12 @@ public class Booking {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @JsonManagedReference
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JsonBackReference
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "car_id", nullable = false)
     private Car car;
 
