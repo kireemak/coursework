@@ -7,6 +7,7 @@ import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.repositories.BookingRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 public class BookingService {
@@ -28,17 +30,22 @@ public class BookingService {
         this.bookingRepository = bookingRepository;
     }
 
-    public Set<Booking> getBookingsByUser(User user) {
+    public Set<Booking> getCurrentUserBookings() {
+        User user = userService.getCurrentAuthenticatedUser();
         return userService.getCurrentUserBookingList(user);
     }
 
     public Booking getBookingById(Long id) {
         User user = userService.getCurrentAuthenticatedUser();
         Booking booking = bookingRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Booking", "id", id)
+                () -> {
+                    log.warn("Booking with id {} not found", id);
+                    return new ResourceNotFoundException("Booking", "id", id);
+                }
         );
 
         if (validateAccess(booking, user)) {
+            log.warn("Access denied for user {} to get booking {}", user.getName(), id);
             throw new AccessDeniedException("You are not allowed to view this booking");
         }
 
@@ -62,10 +69,12 @@ public class BookingService {
         Booking existingBooking = getBookingById(id);
 
         if (validateAccess(existingBooking, user)) {
+            log.error("Access denied for user {} to update booking {}", user.getName(), id);
             throw new AccessDeniedException("You can't update this booking");
         }
 
         if (!existingBooking.getStatus().equals("Created")) {
+            log.error("Booking {} status is not valid: {}", id, existingBooking.getStatus());
             throw new IllegalStateException("Only bookings with status CREATED can be updated");
         }
 
@@ -89,10 +98,12 @@ public class BookingService {
         Booking booking = getBookingById(id);
 
         if (validateAccess(booking, user)) {
+            log.error("Access denied for user {} to delete booking {}", user.getName(), id);
             throw new AccessDeniedException("You can't delete this booking");
         }
 
         if (!(booking.getStatus().equals("Created") || booking.getStatus().equals("Cancelled"))) {
+            log.error("Booking {} status is not valid: {}", id, booking.getStatus());
             throw new IllegalStateException("Only CREATED or CANCELLED bookings can be deleted");
         }
 
@@ -102,24 +113,29 @@ public class BookingService {
     @Transactional(readOnly = false)
     public Booking createBookingWithCheck(Booking booking) {
         Car car = carService.getCarById(booking.getCar().getId());
-        if (car == null) {
-            throw new ResourceNotFoundException("Car", "id", booking.getCar().getId());
-        }
 
         if (!"Available".equalsIgnoreCase(car.getStatus())) {
+            log.error("Attempt to book an unavailable car {}. Status was {}", car.getId(), car.getStatus());
             throw new NotValidResourceState("Car is not available for booking.");
         }
 
+        booking.setUser(userService.getCurrentAuthenticatedUser());
         car.setStatus("Rented");
-        carService.createCar(car);
+        carService.updateCar(car.getId(), car);
 
         return createBooking(booking);
     }
 
     @Transactional(readOnly = false)
     public Booking completeBooking(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new ResourceNotFoundException("Booking", "id", bookingId));
+        User user = userService.getCurrentAuthenticatedUser();
+        Booking booking = getBookingById(bookingId);
+
+        if (validateAccess(booking, user)) {
+            log.warn("Access denied for user {} to complete booking {}", user.getName(), bookingId);
+            throw new AccessDeniedException("You can't complete this booking");
+        }
+
         Car car = booking.getCar();
         car.setStatus("Available");
         carService.createCar(car);

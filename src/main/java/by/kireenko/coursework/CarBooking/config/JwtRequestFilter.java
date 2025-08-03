@@ -33,7 +33,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 username = jwtTokenUtils.getUsernameFromToken(jwt);
             } catch (ExpiredJwtException e) {
-                log.debug("Время жизни токена вышло");
+                log.warn("JWT token has expired for user: {}", e.getClaims().getSubject());
+                throw e;
             }
         }
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

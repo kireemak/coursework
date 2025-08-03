@@ -20,18 +20,15 @@ import java.util.Set;
 public class BookingController {
 
     private final BookingService bookingService;
-    private final UserService userService;
 
     @Autowired
     public BookingController(BookingService bookingService, UserService userService) {
         this.bookingService = bookingService;
-        this.userService = userService;
     }
 
     @GetMapping
-    public Set<Booking> getBookingsByUser() {
-        User user = userService.getCurrentAuthenticatedUser();
-        return bookingService.getBookingsByUser(user);
+    public Set<Booking> getCurrentUserBookings() {
+        return bookingService.getCurrentUserBookings();
     }
 
     @GetMapping("/{id}")
@@ -56,23 +53,11 @@ public class BookingController {
 
     @PostMapping("/create-with-check")
     public Booking createBookingWithCheck(@RequestBody Booking booking) {
-        User user = userService.getCurrentAuthenticatedUser();
-
-        booking.setUser(user);
-
         return bookingService.createBookingWithCheck(booking);
     }
 
     @PutMapping("/{id}/complete")
     public Booking completeBooking(@PathVariable Long id) {
-        User user = userService.getCurrentAuthenticatedUser();
-        Booking booking = bookingService.getBookingById(id);
-
-        if (!booking.getUser().getId().equals(user.getId()) &&
-                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))){
-            throw new AccessDeniedException("You can't complete this booking");
-        }
-
         return bookingService.completeBooking(id);
     }
 }
