@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.services;
 
+import by.kireenko.coursework.CarBooking.dto.CarDto;
 import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.repositories.CarRepository;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -24,6 +26,12 @@ public class CarService {
 
     public List<Car> getAllCars() {
         return carRepository.findAll();
+    }
+
+    public List<CarDto> getAllCarsDto() {
+        List<CarDto> carDtoList = new ArrayList<>();
+        getAllCars().forEach(car -> carDtoList.add(new CarDto(car)));
+        return carDtoList;
     }
 
     public Car getCarById(Long id) {
@@ -62,6 +70,12 @@ public class CarService {
 
     public List<Car> getAvailableCars() {
         return carRepository.findByStatus("Available");
+    }
+
+    public List<CarDto> getAvailableCarsDto() {
+        List<CarDto> carDtoList = new ArrayList<>();
+        getAvailableCars().forEach(car -> carDtoList.add(new CarDto(car)));
+        return carDtoList;
     }
 }
 

@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.services;
 
+import by.kireenko.coursework.CarBooking.dto.BookingDto;
 import by.kireenko.coursework.CarBooking.error.NotValidResourceState;
 import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Booking;
@@ -13,6 +14,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -30,9 +33,26 @@ public class BookingService {
         this.bookingRepository = bookingRepository;
     }
 
-    public Set<Booking> getCurrentUserBookings() {
+    public List<Booking> getAllBookings() {
+        log.info("Fetching all bookings");
+        return bookingRepository.findAll();
+    }
+
+    public List<BookingDto> getAllBookingsDto() {
+        List<BookingDto> bookingDtoList = new ArrayList<>();
+        getAllBookings().forEach(booking -> bookingDtoList.add(new BookingDto(booking)));
+        return bookingDtoList;
+    }
+
+    public List<Booking> getCurrentUserBookings() {
         User user = userService.getCurrentAuthenticatedUser();
         return userService.getCurrentUserBookingList(user);
+    }
+
+    public List<BookingDto> getCurrentUserBookingsDto() {
+        List<BookingDto> bookingDtoList = new ArrayList<>();
+        getCurrentUserBookings().forEach(booking -> bookingDtoList.add(new BookingDto(booking)));
+        return bookingDtoList;
     }
 
     public Booking getBookingById(Long id) {

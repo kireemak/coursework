@@ -74,7 +74,7 @@ public class UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    public Set<Booking> getCurrentUserBookingList(User user) {
+    public List<Booking> getCurrentUserBookingList(User user) {
         User currUser = getUserById(user.getId());
         return currUser.getBookings();
     }

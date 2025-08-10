@@ -40,9 +40,9 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles;
+    private List<Role> roles;
 
-    @JsonManagedReference
+    @JsonManagedReference("user-booking")
     @OneToMany(fetch = FetchType.LAZY, mappedBy="user")
-    private Set<Booking> bookings;
+    private List<Booking> bookings;
 }
