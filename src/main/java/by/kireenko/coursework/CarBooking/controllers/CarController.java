@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.controllers;
 
+import by.kireenko.coursework.CarBooking.dto.CarDto;
 import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.services.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,25 +20,25 @@ public class CarController {
     }
 
     @GetMapping
-    public List<Car> getAllCars() {
-        return carService.getAllCars();
+    public List<CarDto> getAllCars() {
+        return carService.getAllCarsDto();
     }
 
     @GetMapping("/{id}")
-    public Car getCarById(@PathVariable Long id) {
-        return carService.getCarById(id);
+    public CarDto getCarById(@PathVariable Long id) {
+        return new CarDto(carService.getCarById(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public Car createCar(@RequestBody Car car) {
-        return carService.createCar(car);
+    public CarDto createCar(@RequestBody Car car) {
+        return new CarDto(carService.createCar(car));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public Car updateCar(@PathVariable Long id, @RequestBody Car car) {
-        return carService.updateCar(id, car);
+    public CarDto updateCar(@PathVariable Long id, @RequestBody Car car) {
+        return new CarDto(carService.updateCar(id, car));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -52,7 +53,7 @@ public class CarController {
     }
 
     @GetMapping("/available")
-    public List<Car> getAvailableCars() {
-        return carService.getAvailableCars();
+    public List<CarDto> getAvailableCars() {
+        return carService.getAvailableCarsDto();
     }
 }

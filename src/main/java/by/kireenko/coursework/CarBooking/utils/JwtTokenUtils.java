@@ -17,7 +17,7 @@ public class JwtTokenUtils {
 
     @Value("${jwt.secret}")
     private String secret;
-    private Duration jwtLifetime = Duration.ofMinutes(30);
+    private final Duration jwtLifetime = Duration.ofMinutes(30);
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
@@ -36,8 +36,8 @@ public class JwtTokenUtils {
         return Jwts.parser()
                 .setSigningKey(secret)
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public String getUsernameFromToken(String token) {

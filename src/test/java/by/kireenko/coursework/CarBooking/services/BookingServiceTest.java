@@ -11,6 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -67,9 +69,9 @@ public class BookingServiceTest {
         User clientUser = new User();
         User ownerUser = new User();
         clientUser.setId(22L);
-        clientUser.setRoles(Set.of(new Role(1, "ROLE_USER")));
+        clientUser.setRoles(List.of(new Role(1, "ROLE_USER")));
         ownerUser.setId(10L);
-        ownerUser.setRoles(Set.of(new Role(1, "ROLE_USER")));
+        ownerUser.setRoles(List.of(new Role(1, "ROLE_USER")));
 
         Booking booking = new Booking();
         booking.setId(11L);
@@ -89,7 +91,7 @@ public class BookingServiceTest {
         User ownerUser = new User();
         adminUser.setId(22L);
         Role adminRole = new Role(2, "ROLE_ADMIN");
-        adminUser.setRoles(Set.of(adminRole));
+        adminUser.setRoles(List.of(adminRole));
         ownerUser.setId(10L);
 
         Booking booking = new Booking();

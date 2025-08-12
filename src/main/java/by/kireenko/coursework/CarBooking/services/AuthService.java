@@ -9,6 +9,7 @@ import by.kireenko.coursework.CarBooking.error.UserAlreadyExistsException;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.utils.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -28,23 +30,28 @@ public class AuthService {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(jwtRequest.getName(), jwtRequest.getPassword()));
         } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("Неправильный логин или пароль");
+            log.warn("Authentication failed for the user: {}", jwtRequest.getName());
+            throw new BadCredentialsException("Incorrect username or password");
         }
 
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(jwtRequest.getName());
         String token = jwtTokenUtils.generateToken(userDetails);
+        log.info("Token generated for user: {}", jwtRequest.getName());
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
     public ResponseEntity<?> createNewUser(RegistrationUserDto registrationUserDto) {
         if (!registrationUserDto.getPassword().equals(registrationUserDto.getConfirmPassword())) {
-            throw new MismatchedPasswordsException("Пароли не совпадают");
+            log.warn("Password mismatch for user registration: {}", registrationUserDto.getName());
+            throw new MismatchedPasswordsException("Passwords do not match");
         }
         if (customUserDetailsService.loadUserByUsername(registrationUserDto.getName()) != null) {
-            throw new UserAlreadyExistsException("Пользователь с указанным именем уже существует");
+            log.warn("Username already exist for user: {}", registrationUserDto.getName());
+            throw new UserAlreadyExistsException("Username already in use");
         }
 
         User user = customUserDetailsService.createNewUser(registrationUserDto);
+        log.info("Created new user: {}", user.getName());
         return ResponseEntity.ok(user);
     }
 }

@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,7 +25,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userService.getUserByName(username);
         if (user == null) {
-            log.error("User not found");
+            log.error("User not found: {}", username);
             return null;
         }
 
@@ -46,7 +45,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         user.setPassword(registrationUserDto.getPassword());
         user.setEmail(registrationUserDto.getEmail());
         user.setPhoneNumber(registrationUserDto.getPhone());
-        user.setRoles(Set.of(roleService.getUserRole()));
+        user.setRoles(List.of(roleService.getUserRole()));
         return userService.createUser(user);
     }
 
@@ -56,7 +55,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         user.setPassword(registrationUserDto.getPassword());
         user.setEmail(registrationUserDto.getEmail());
         user.setPhoneNumber(registrationUserDto.getPhone());
-        user.setRoles(Set.of(roleService.getAdminRole()));
+        user.setRoles(List.of(roleService.getAdminRole()));
         return userService.createUser(user);
     }
 }

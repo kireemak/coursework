@@ -1,11 +1,13 @@
 package by.kireenko.coursework.CarBooking.controllers;
 
+import by.kireenko.coursework.CarBooking.dto.BookingDto;
 import by.kireenko.coursework.CarBooking.models.Booking;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.services.BookingService;
 import by.kireenko.coursework.CarBooking.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -20,33 +22,36 @@ import java.util.Set;
 public class BookingController {
 
     private final BookingService bookingService;
-    private final UserService userService;
 
     @Autowired
-    public BookingController(BookingService bookingService, UserService userService) {
+    public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
-        this.userService = userService;
     }
 
     @GetMapping
-    public Set<Booking> getBookingsByUser() {
-        User user = userService.getCurrentAuthenticatedUser();
-        return bookingService.getBookingsByUser(user);
+    public List<BookingDto> getCurrentUserBookings() {
+        return bookingService.getCurrentUserBookingsDto();
+    }
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<BookingDto> getAllBookings() {
+        return bookingService.getAllBookingsDto();
     }
 
     @GetMapping("/{id}")
-    public Booking getBookingById(@PathVariable Long id) {
-        return bookingService.getBookingById(id);
+    public BookingDto getBookingById(@PathVariable Long id) {
+        return new BookingDto(bookingService.getBookingById(id));
     }
 
     @PostMapping
-    public Booking createBooking(@RequestBody Booking booking) {
-        return bookingService.createBooking(booking);
+    public BookingDto createBooking(@RequestBody Booking booking) {
+        return new BookingDto(bookingService.createBooking(booking));
     }
 
     @PutMapping("/{id}")
-    public Booking updateBooking(@PathVariable Long id, @RequestBody Booking updatedBooking) {
-        return bookingService.updateBooking(id, updatedBooking);
+    public BookingDto updateBooking(@PathVariable Long id, @RequestBody Booking updatedBooking) {
+        return new BookingDto(bookingService.updateBooking(id, updatedBooking));
     }
 
     @DeleteMapping("/{id}")
@@ -55,24 +60,12 @@ public class BookingController {
     }
 
     @PostMapping("/create-with-check")
-    public Booking createBookingWithCheck(@RequestBody Booking booking) {
-        User user = userService.getCurrentAuthenticatedUser();
-
-        booking.setUser(user);
-
-        return bookingService.createBookingWithCheck(booking);
+    public BookingDto createBookingWithCheck(@RequestBody Booking booking) {
+        return new BookingDto(bookingService.createBookingWithCheck(booking));
     }
 
     @PutMapping("/{id}/complete")
-    public Booking completeBooking(@PathVariable Long id) {
-        User user = userService.getCurrentAuthenticatedUser();
-        Booking booking = bookingService.getBookingById(id);
-
-        if (!booking.getUser().getId().equals(user.getId()) &&
-                !user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))){
-            throw new AccessDeniedException("You can't complete this booking");
-        }
-
-        return bookingService.completeBooking(id);
+    public BookingDto completeBooking(@PathVariable Long id) {
+        return new BookingDto(bookingService.completeBooking(id));
     }
 }
