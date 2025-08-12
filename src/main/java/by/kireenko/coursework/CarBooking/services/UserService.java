@@ -36,7 +36,10 @@ public class UserService {
     }
 
     public User getUserByName(String name) {
-        return userRepository.findByName(name).orElse(null);
+        return userRepository.findByName(name).orElseThrow(() -> {
+            log.warn("User with name {} not found", name);
+            return new ResourceNotFoundException("User", "name", name);
+        });
     }
 
     public User getUserById(Long id) {
