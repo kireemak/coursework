@@ -132,7 +132,7 @@ public class BookingService {
 
     @Transactional(readOnly = false)
     public Booking createBookingWithCheck(Booking booking) {
-        Car car = carService.getCarById(booking.getCar().getId());
+        Car car = carService.getCarWithLockById(booking.getCar().getId());
 
         if (!"Available".equalsIgnoreCase(car.getStatus())) {
             log.error("Attempt to book an unavailable car {}. Status was {}", car.getId(), car.getStatus());
@@ -150,13 +150,13 @@ public class BookingService {
     public Booking completeBooking(Long bookingId) {
         User user = userService.getCurrentAuthenticatedUser();
         Booking booking = getBookingById(bookingId);
+        Car car = carService.getCarWithLockById(booking.getCar().getId());
 
         if (validateAccess(booking, user)) {
             log.warn("Access denied for user {} to complete booking {}", user.getName(), bookingId);
             throw new AccessDeniedException("You can't complete this booking");
         }
 
-        Car car = booking.getCar();
         car.setStatus("Available");
         carService.createCar(car);
         booking.setStatus("Completed");
