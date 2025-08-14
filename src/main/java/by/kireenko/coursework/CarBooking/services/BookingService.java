@@ -72,6 +72,23 @@ public class BookingService {
         return booking;
     }
 
+    public Booking getBookingWithLockById(Long id) {
+        User user = userService.getCurrentAuthenticatedUser();
+        Booking booking = bookingRepository.findAndLockById(id).orElseThrow(
+                () -> {
+                    log.warn("Booking with id {} not found", id);
+                    return new ResourceNotFoundException("Booking", "id", id);
+                }
+        );
+
+        if (validateAccess(booking, user)) {
+            log.warn("Access denied for user {} to get booking {}", user.getName(), id);
+            throw new AccessDeniedException("You are not allowed to view this booking");
+        }
+
+        return booking;
+    }
+
     @Transactional(readOnly = false)
     public Booking createBooking(Booking booking) {
         User user = userService.getCurrentAuthenticatedUser();
@@ -149,7 +166,7 @@ public class BookingService {
     @Transactional(readOnly = false)
     public Booking completeBooking(Long bookingId) {
         User user = userService.getCurrentAuthenticatedUser();
-        Booking booking = getBookingById(bookingId);
+        Booking booking = getBookingWithLockById(bookingId);
         Car car = carService.getCarWithLockById(booking.getCar().getId());
 
         if (validateAccess(booking, user)) {
@@ -158,7 +175,7 @@ public class BookingService {
         }
 
         car.setStatus("Available");
-        carService.createCar(car);
+        carService.updateCar(car.getId(), car);
         booking.setStatus("Completed");
         return bookingRepository.save(booking);
     }

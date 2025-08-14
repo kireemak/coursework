@@ -1,10 +1,13 @@
 package by.kireenko.coursework.CarBooking.services;
 
+import by.kireenko.coursework.CarBooking.error.NotValidResourceState;
 import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Booking;
+import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.models.Role;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.repositories.BookingRepository;
+import by.kireenko.coursework.CarBooking.repositories.CarRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +20,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +30,7 @@ public class BookingServiceTest {
 
     @Mock private BookingRepository bookingRepository;
     @Mock private UserService userService;
+    @Mock private CarService carService;
 
     @InjectMocks
     private BookingService bookingService;
@@ -105,5 +110,70 @@ public class BookingServiceTest {
         assertThat(result.getId()).isEqualTo(11L);
         assertThat(result.getUser()).isEqualTo(ownerUser);
         verify(bookingRepository).findById(11L);
+    }
+
+    @Test
+    public void createBookingWithCheck_WhenCarIsntValid_ShouldThrowException() {
+        Booking booking = new Booking();
+        Car car = new Car();
+        car.setId(1L);
+        car.setStatus("Rented");
+        booking.setCar(car);
+        when(carService.getCarWithLockById(booking.getCar().getId())).thenReturn(car);
+        assertThrows(NotValidResourceState.class, () -> bookingService.createBookingWithCheck(booking));
+    }
+
+    @Test
+    public void createBookingWithCheck_WhenCarIsValid_ShouldReturnCar() {
+        Booking booking = new Booking();
+        Car car = new Car();
+        car.setId(1L);
+        car.setStatus("Available");
+        booking.setCar(car);
+        User user = new User();
+        when(carService.getCarWithLockById(booking.getCar().getId())).thenReturn(car);
+        when(userService.getCurrentAuthenticatedUser()).thenReturn(user);
+        when(carService.updateCar(any(Long.class), any(Car.class))).thenReturn(car);
+        when(bookingRepository.save(booking)).thenReturn(booking);
+
+        booking = bookingService.createBookingWithCheck(booking);
+
+        assertThat(booking).isNotNull();
+        assertThat(booking.getCar()).isEqualTo(car);
+        assertThat(booking.getUser()).isEqualTo(user);
+        verify(carService).getCarWithLockById(booking.getCar().getId());
+        verify(carService).updateCar(any(Long.class), any(Car.class));
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    public void completeBooking_WhenUserIsOwner_ShouldReturnBooking() {
+        Booking booking = new Booking();
+        booking.setId(1L);
+        User user = new User();
+        user.setId(1L);
+        user.setRoles(List.of(new Role(1, "ROLE_USER")));
+        booking.setUser(user);
+        Car car = new Car();
+        car.setId(1L);
+        car.setStatus("Rented");
+        booking.setCar(car);
+        when(carService.getCarWithLockById(booking.getCar().getId())).thenReturn(car);
+        when(userService.getCurrentAuthenticatedUser()).thenReturn(user);
+        when(bookingRepository.findAndLockById(1L)).thenReturn(Optional.of(booking));
+        when(carService.updateCar(any(Long.class), any(Car.class))).thenReturn(car);
+        when(bookingRepository.save(booking)).thenReturn(booking);
+
+        booking = bookingService.completeBooking(booking.getId());
+
+        assertThat(booking).isNotNull();
+        assertThat(booking.getCar()).isEqualTo(car);
+        assertThat(booking.getUser()).isEqualTo(user);
+        assertThat(booking.getCar().getStatus()).isEqualTo("Available");
+        assertThat(booking.getStatus()).isEqualTo("Completed");
+        verify(carService).getCarWithLockById(booking.getCar().getId());
+        verify(carService).updateCar(any(Long.class), any(Car.class));
+        verify(bookingRepository).findAndLockById(1L);
+        verify(bookingRepository).save(booking);
     }
 }

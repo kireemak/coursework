@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CarServiceTest {
@@ -90,5 +90,13 @@ public class CarServiceTest {
         assertThat(carDtoList.get(1).getBrand()).isEqualTo("testBrand2");
         assertThat(carDtoList.get(2).getBrand()).isEqualTo("testBrand5");
         assertThat(carDtoList.get(3).getBrand()).isEqualTo("testBrand7");
+    }
+
+    @Test
+    public void createCar_ShouldReturnCar() {
+        Car car = new Car();
+        when(carRepository.save(car)).thenReturn(car);
+        carService.createCar(car);
+        verify(carRepository, times(1)).save(car);
     }
 }

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.verification.VerificationMode;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -19,21 +20,24 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
     @InjectMocks
     private UserService userService;
 
     List<User> users;
-    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @BeforeEach
     public void initializeUsers() {
+        PasswordEncoder initPasswordEncoder = new BCryptPasswordEncoder();
         users = List.of(new User(1L, "testName1", "testEmail1", "testPhone1",
                         "testPassword1", List.of(new Role(1, "ROLE_USER")), List.of()),
                 new User(2L, "testName2", "testEmail2", "testPhone2",
@@ -50,8 +54,7 @@ public class UserServiceTest {
                         "testPassword7", List.of(new Role(1, "ROLE_USER")), List.of()),
                 new User(8L, "testName8", "testEmail8", "testPhone8",
                         "testPassword8", List.of(new Role(2, "ROLE_ADMIN")), List.of()));
-
-        users.forEach(user -> user.setPassword(passwordEncoder.encode(user.getPassword())));
+        users.forEach(user -> user.setPassword(initPasswordEncoder.encode(user.getPassword())));
     }
 
     @Test
@@ -111,5 +114,21 @@ public class UserServiceTest {
     public void getUserById_WhenUserIsNotExist_ThrowsException() {
         when(userRepository.findById(12345L)).thenReturn(Optional.empty());
         assertThrows(ResourceNotFoundException.class, () -> userService.getUserById(12345L));
+    }
+
+    @Test
+    public void createUser_ReturnUser() {
+        User user = new User(1L, "name", "phone", "email", "password",
+                List.of(), List.of());
+
+        when(userRepository.save(user)).thenReturn(user);
+        when(passwordEncoder.encode(any(String.class))).thenReturn("encodedPassword");
+
+        User createdUser = userService.createUser(user);
+
+        assertThat(createdUser).isNotNull();
+        assertThat(createdUser.getPassword()).isEqualTo("encodedPassword");
+        verify(passwordEncoder, times(1)).encode(any(String.class));
+        verify(userRepository, times(1)).save(user);
     }
 }
