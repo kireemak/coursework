@@ -43,6 +43,15 @@ public class CarService {
     }
 
     @Transactional(readOnly = false)
+    public Car getCarWithLockById(Long id) {
+        return carRepository.findAndLockById(id)
+                .orElseThrow(() -> {
+                    log.warn("Car with id {} not found", id);
+                    return new ResourceNotFoundException("Car", "id", id);
+                });
+    }
+
+    @Transactional(readOnly = false)
     public Car createCar(Car car) {
         return carRepository.save(car);
     }
