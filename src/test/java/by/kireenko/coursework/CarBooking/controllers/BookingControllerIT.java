@@ -3,9 +3,6 @@ package by.kireenko.coursework.CarBooking.controllers;
 import by.kireenko.coursework.CarBooking.AbstractIntegreationTest;
 import by.kireenko.coursework.CarBooking.dto.CreateBookingRequestDto;
 import by.kireenko.coursework.CarBooking.dto.UpdateBookingRequestDto;
-import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
-import by.kireenko.coursework.CarBooking.models.Booking;
-import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.services.BookingService;
 import by.kireenko.coursework.CarBooking.services.CustomUserDetailsService;
 import by.kireenko.coursework.CarBooking.utils.JwtTokenUtils;
@@ -21,7 +18,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -31,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest//(properties = "spring.cors.enabled=false")
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class BookingControllerTest extends AbstractIntegreationTest {
+public class BookingControllerIT extends AbstractIntegreationTest {
 
     @Autowired
     private MockMvc mockMvc;

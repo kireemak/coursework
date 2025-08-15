@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest//(properties = "spring.cors.enabled=false")
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class UserControllerTest extends AbstractIntegreationTest {
+public class UserControllerIT extends AbstractIntegreationTest {
     @Autowired
     private MockMvc mockMvc;
     @Autowired
