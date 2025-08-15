@@ -4,11 +4,13 @@ import by.kireenko.coursework.CarBooking.models.Booking;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Schema(description = "DTO for booking data")
 public class BookingDto {
     @Schema(description = "Booking ID", example = "1")

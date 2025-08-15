@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.services;
 
+import by.kireenko.coursework.CarBooking.dto.CreateBookingRequestDto;
 import by.kireenko.coursework.CarBooking.error.NotValidResourceState;
 import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Booking;
@@ -114,36 +115,42 @@ public class BookingServiceTest {
 
     @Test
     public void createBookingWithCheck_WhenCarIsntValid_ShouldThrowException() {
-        Booking booking = new Booking();
+        CreateBookingRequestDto bookingRequestDto = new CreateBookingRequestDto();
         Car car = new Car();
         car.setId(1L);
         car.setStatus("Rented");
-        booking.setCar(car);
-        when(carService.getCarWithLockById(booking.getCar().getId())).thenReturn(car);
-        assertThrows(NotValidResourceState.class, () -> bookingService.createBookingWithCheck(booking));
+        bookingRequestDto.setCarId(car.getId());
+        when(carService.getCarWithLockById(bookingRequestDto.getCarId())).thenReturn(car);
+        assertThrows(NotValidResourceState.class, () -> bookingService.createBookingWithCheck(bookingRequestDto));
     }
 
     @Test
     public void createBookingWithCheck_WhenCarIsValid_ShouldReturnCar() {
         Booking booking = new Booking();
+        CreateBookingRequestDto bookingRequestDto = new CreateBookingRequestDto();
         Car car = new Car();
         car.setId(1L);
         car.setStatus("Available");
         booking.setCar(car);
+        bookingRequestDto.setCarId(car.getId());
         User user = new User();
-        when(carService.getCarWithLockById(booking.getCar().getId())).thenReturn(car);
+        user.setId(1L);
+        when(carService.getCarWithLockById(bookingRequestDto.getCarId())).thenReturn(car);
+        when(carService.getCarById(bookingRequestDto.getCarId())).thenReturn(car);
         when(userService.getCurrentAuthenticatedUser()).thenReturn(user);
-        when(carService.updateCar(any(Long.class), any(Car.class))).thenReturn(car);
-        when(bookingRepository.save(booking)).thenReturn(booking);
+        when(carService.updateCar(car.getId(), car)).thenReturn(car);
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        booking = bookingService.createBookingWithCheck(booking);
+        Booking testBooking = bookingService.createBookingWithCheck(bookingRequestDto);
 
-        assertThat(booking).isNotNull();
-        assertThat(booking.getCar()).isEqualTo(car);
-        assertThat(booking.getUser()).isEqualTo(user);
-        verify(carService).getCarWithLockById(booking.getCar().getId());
-        verify(carService).updateCar(any(Long.class), any(Car.class));
-        verify(bookingRepository).save(booking);
+        assertThat(testBooking).isNotNull();
+        assertThat(testBooking.getCar()).isEqualTo(car);
+        assertThat(testBooking.getUser()).isEqualTo(user);
+        assertThat(testBooking.getStatus()).isEqualTo("Created");
+        assertThat(testBooking.getCar().getStatus()).isEqualTo("Rented");
+        verify(carService).getCarWithLockById(car.getId());
+        verify(carService).updateCar(car.getId(), car);
+        verify(bookingRepository).save(testBooking);
     }
 
     @Test

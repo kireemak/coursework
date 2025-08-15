@@ -48,8 +48,8 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing user", description = "Updates an existing user's information.")
-    public UserDto updateUser(@PathVariable Long id, @RequestBody User user) {
-        return new UserDto(userService.updateUser(id, user));
+    public UserDto updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
+        return new UserDto(userService.updateUser(id, userDto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

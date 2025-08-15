@@ -4,9 +4,11 @@ import by.kireenko.coursework.CarBooking.models.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Schema(description = "DTO for user data")
 public class UserDto {
     @Schema(description = "User ID", example = "1")

@@ -57,11 +57,14 @@ public class UserService {
     }
 
     @Transactional(readOnly = false)
-    public User updateUser(Long id, User updatedUser) {
-        User existingUser = getUserById(id);
-        existingUser.setName(updatedUser.getName());
-        existingUser.setEmail(updatedUser.getEmail());
-        existingUser.setPhoneNumber(updatedUser.getPhoneNumber());
+    public User updateUser(Long userId, UserDto updatedUserDto) {
+        User existingUser = getUserById(userId);
+        if (updatedUserDto.getName() != null)
+            existingUser.setName(updatedUserDto.getName());
+        if (updatedUserDto.getEmail() != null)
+            existingUser.setEmail(updatedUserDto.getEmail());
+        if (updatedUserDto.getPhoneNumber() != null)
+            existingUser.setPhoneNumber(updatedUserDto.getPhoneNumber());
         return userRepository.save(existingUser);
     }
 

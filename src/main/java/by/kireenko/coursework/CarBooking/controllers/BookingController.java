@@ -1,6 +1,8 @@
 package by.kireenko.coursework.CarBooking.controllers;
 
 import by.kireenko.coursework.CarBooking.dto.BookingDto;
+import by.kireenko.coursework.CarBooking.dto.CreateBookingRequestDto;
+import by.kireenko.coursework.CarBooking.dto.UpdateBookingRequestDto;
 import by.kireenko.coursework.CarBooking.models.Booking;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.services.BookingService;
@@ -18,8 +20,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import java.util.List;
 import java.util.Set;
 
-@EnableWebMvc
-@Controller
 @RestController
 @RequestMapping("/api/bookings")
 @SecurityRequirement(name = "bearerAuth")
@@ -54,14 +54,14 @@ public class BookingController {
 
     @PostMapping
     @Operation(summary = "Create a booking", description = "Creates a new booking for the current user.")
-    public BookingDto createBooking(@RequestBody Booking booking) {
-        return new BookingDto(bookingService.createBooking(booking));
+    public BookingDto createBooking(@RequestBody CreateBookingRequestDto bookingRequestDto) {
+        return new BookingDto(bookingService.createBooking(bookingRequestDto));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a booking", description = "Updates an existing booking. Can only be done for bookings with 'Created' status.")
-    public BookingDto updateBooking(@PathVariable Long id, @RequestBody Booking updatedBooking) {
-        return new BookingDto(bookingService.updateBooking(id, updatedBooking));
+    public BookingDto updateBooking(@PathVariable Long id, @RequestBody UpdateBookingRequestDto updateBookingRequest) {
+        return new BookingDto(bookingService.updateBooking(id, updateBookingRequest));
     }
 
     @DeleteMapping("/{id}")
@@ -72,8 +72,8 @@ public class BookingController {
 
     @PostMapping("/create-with-check")
     @Operation(summary = "Create a booking with availability check", description = "Creates a booking only if the car is available and updates the car's status to 'Rented'.")
-    public BookingDto createBookingWithCheck(@RequestBody Booking booking) {
-        return new BookingDto(bookingService.createBookingWithCheck(booking));
+    public BookingDto createBookingWithCheck(@RequestBody CreateBookingRequestDto bookingRequestDto) {
+        return new BookingDto(bookingService.createBookingWithCheck(bookingRequestDto));
     }
 
     @PutMapping("/{id}/complete")

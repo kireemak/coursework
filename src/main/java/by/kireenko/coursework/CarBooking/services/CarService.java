@@ -59,11 +59,16 @@ public class CarService {
     @Transactional(readOnly = false)
     public Car updateCar(Long id, Car updatedCar) {
         Car existingCar = getCarById(id);
-        existingCar.setBrand(updatedCar.getBrand());
-        existingCar.setModel(updatedCar.getModel());
-        existingCar.setYear(updatedCar.getYear());
-        existingCar.setRentalPrice(updatedCar.getRentalPrice());
-        existingCar.setStatus(updatedCar.getStatus());
+        if (updatedCar.getBrand() != null)
+            existingCar.setBrand(updatedCar.getBrand());
+        if (updatedCar.getModel() != null)
+            existingCar.setModel(updatedCar.getModel());
+        if (updatedCar.getYear() != null)
+            existingCar.setYear(updatedCar.getYear());
+        if (updatedCar.getRentalPrice() != null)
+            existingCar.setRentalPrice(updatedCar.getRentalPrice());
+        if (updatedCar.getStatus() != null)
+            existingCar.setStatus(updatedCar.getStatus());
         return carRepository.save(existingCar);
     }
 

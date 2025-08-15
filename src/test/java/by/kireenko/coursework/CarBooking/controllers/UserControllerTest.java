@@ -1,6 +1,7 @@
 package by.kireenko.coursework.CarBooking.controllers;
 
 import by.kireenko.coursework.CarBooking.AbstractIntegreationTest;
+import by.kireenko.coursework.CarBooking.dto.UserDto;
 import by.kireenko.coursework.CarBooking.models.Role;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.services.CustomUserDetailsService;
@@ -123,24 +124,23 @@ public class UserControllerTest extends AbstractIntegreationTest {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName3");
         String token = jwtTokenUtils.generateToken(userDetails);
 
-        User user = new User(999999L, "newName", "newEmail", "newPhoneNumber",
-                "newPassword", List.of(new Role(1, "ROLE_USER")), null);
+        UserDto userDto = new UserDto(999999L, "newName", "newEmail", "newPhoneNumber");
 
-        mockMvc.perform(put("/api/users/{id}", user.getId())
+        mockMvc.perform(put("/api/users/{id}", userDto.getId())
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
+                        .content(objectMapper.writeValueAsString(userDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", notNullValue()))
-                .andExpect(jsonPath("$.id", is(user.getId().intValue())));
+                .andExpect(jsonPath("$.id", is(userDto.getId().intValue())));
 
-        mockMvc.perform(get("/api/users/{id}", user.getId())
+        mockMvc.perform(get("/api/users/{id}", userDto.getId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(user.getId().intValue())))
-                .andExpect(jsonPath("$.name", is(user.getName())))
-                .andExpect(jsonPath("$.phoneNumber", is(user.getPhoneNumber())))
-                .andExpect(jsonPath("$.email", is(user.getEmail())));
+                .andExpect(jsonPath("$.id", is(userDto.getId().intValue())))
+                .andExpect(jsonPath("$.name", is(userDto.getName())))
+                .andExpect(jsonPath("$.phoneNumber", is(userDto.getPhoneNumber())))
+                .andExpect(jsonPath("$.email", is(userDto.getEmail())));
     }
 
     @Test

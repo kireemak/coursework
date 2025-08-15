@@ -1,6 +1,8 @@
 package by.kireenko.coursework.CarBooking.controllers;
 
 import by.kireenko.coursework.CarBooking.AbstractIntegreationTest;
+import by.kireenko.coursework.CarBooking.dto.CreateBookingRequestDto;
+import by.kireenko.coursework.CarBooking.dto.UpdateBookingRequestDto;
 import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Booking;
 import by.kireenko.coursework.CarBooking.models.Car;
@@ -94,18 +96,15 @@ public class BookingControllerTest extends AbstractIntegreationTest {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);
 
-        Booking booking = new Booking();
-        Car car = new Car();
-        car.setId(1999999L);
-        car.setStatus("Available");
-        booking.setCar(car);
-        booking.setStartDate(LocalDate.now());
-        booking.setEndDate(LocalDate.now().plusMonths(2));
+        CreateBookingRequestDto bookingRequestDto = new CreateBookingRequestDto();
+        bookingRequestDto.setCarId(1999999L);
+        bookingRequestDto.setStartDate(LocalDate.now());
+        bookingRequestDto.setEndDate(LocalDate.now().plusMonths(2));
 
         mockMvc.perform(post("/api/bookings/create-with-check")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(booking)))
+                        .content(objectMapper.writeValueAsString(bookingRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("Created")));
     }
@@ -117,21 +116,21 @@ public class BookingControllerTest extends AbstractIntegreationTest {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);
 
-        Booking booking = new Booking();
+        UpdateBookingRequestDto bookingRequestDto = new UpdateBookingRequestDto();
         LocalDate startDate = LocalDate.now().minusMonths(3);
         LocalDate endDate = LocalDate.now().plusMonths(3);
 
-        booking.setStartDate(startDate);
-        booking.setEndDate(endDate);
+        bookingRequestDto.setStartDate(startDate);
+        bookingRequestDto.setEndDate(endDate);
 
         mockMvc.perform(put("/api/bookings/{id}", 999999L)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(booking)))
+                        .content(objectMapper.writeValueAsString(bookingRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("Created")))
-                .andExpect(jsonPath("$.startDate", is(List.of(startDate.getYear(), startDate.getMonthValue(), startDate.getDayOfMonth()))))
-                .andExpect(jsonPath("$.endDate", is(List.of(endDate.getYear(), endDate.getMonthValue(), endDate.getDayOfMonth()))));
+                .andExpect(jsonPath("$.startDate", is(startDate.toString())))
+                .andExpect(jsonPath("$.endDate", is(endDate.toString())));
     }
 
     @Test
