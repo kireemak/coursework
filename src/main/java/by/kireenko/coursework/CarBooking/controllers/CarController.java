@@ -1,7 +1,7 @@
 package by.kireenko.coursework.CarBooking.controllers;
 
 import by.kireenko.coursework.CarBooking.dto.CarDto;
-import by.kireenko.coursework.CarBooking.models.Car;
+import by.kireenko.coursework.CarBooking.dto.CarRequestDto;
 import by.kireenko.coursework.CarBooking.services.CarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -39,15 +39,15 @@ public class CarController {
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @Operation(summary = "Create a new car (Admin only)", description = "Adds a new car to the system. Requires ADMIN role.")
-    public CarDto createCar(@RequestBody Car car) {
-        return new CarDto(carService.createCar(car));
+    public CarDto createCar(@RequestBody CarRequestDto carRequestDto) {
+        return new CarDto(carService.createCar(carRequestDto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @Operation(summary = "Update a car (Admin only)", description = "Updates an existing car's information.")
-    public CarDto updateCar(@PathVariable Long id, @RequestBody Car car) {
-        return new CarDto(carService.updateCar(id, car));
+    public CarDto updateCar(@PathVariable Long id, @RequestBody CarRequestDto carRequestDto) {
+        return new CarDto(carService.updateCar(id, carRequestDto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

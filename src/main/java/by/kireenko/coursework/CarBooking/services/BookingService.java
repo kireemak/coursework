@@ -9,9 +9,7 @@ import by.kireenko.coursework.CarBooking.models.Booking;
 import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.repositories.BookingRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.sql.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -19,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service

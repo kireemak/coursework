@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.controllers;
 
+import by.kireenko.coursework.CarBooking.dto.UpdateUserRequestDto;
 import by.kireenko.coursework.CarBooking.dto.UserDto;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.services.UserService;
@@ -48,8 +49,8 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing user", description = "Updates an existing user's information.")
-    public UserDto updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        return new UserDto(userService.updateUser(id, userDto));
+    public UserDto updateUser(@PathVariable Long id, @RequestBody UpdateUserRequestDto userRequestDto) {
+        return new UserDto(userService.updateUser(id, userRequestDto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

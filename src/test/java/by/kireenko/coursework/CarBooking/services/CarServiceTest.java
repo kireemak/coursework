@@ -1,6 +1,7 @@
 package by.kireenko.coursework.CarBooking.services;
 
 import by.kireenko.coursework.CarBooking.dto.CarDto;
+import by.kireenko.coursework.CarBooking.dto.CarRequestDto;
 import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.repositories.CarRepository;
@@ -94,9 +95,9 @@ public class CarServiceTest {
 
     @Test
     public void createCar_ShouldReturnCar() {
-        Car car = new Car();
-        when(carRepository.save(car)).thenReturn(car);
-        carService.createCar(car);
-        verify(carRepository, times(1)).save(car);
+        CarRequestDto carRequestDto = new CarRequestDto();
+        when(carRepository.save(any(Car.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        carService.createCar(carRequestDto);
+        verify(carRepository, times(1)).save(any(Car.class));
     }
 }

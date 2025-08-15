@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.services;
 
+import by.kireenko.coursework.CarBooking.dto.UpdateUserRequestDto;
 import by.kireenko.coursework.CarBooking.dto.UserDto;
 import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Booking;
@@ -7,7 +8,6 @@ import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -57,14 +57,14 @@ public class UserService {
     }
 
     @Transactional(readOnly = false)
-    public User updateUser(Long userId, UserDto updatedUserDto) {
+    public User updateUser(Long userId, UpdateUserRequestDto userRequestDto) {
         User existingUser = getUserById(userId);
-        if (updatedUserDto.getName() != null)
-            existingUser.setName(updatedUserDto.getName());
-        if (updatedUserDto.getEmail() != null)
-            existingUser.setEmail(updatedUserDto.getEmail());
-        if (updatedUserDto.getPhoneNumber() != null)
-            existingUser.setPhoneNumber(updatedUserDto.getPhoneNumber());
+        if (userRequestDto.getName() != null)
+            existingUser.setName(userRequestDto.getName());
+        if (userRequestDto.getEmail() != null)
+            existingUser.setEmail(userRequestDto.getEmail());
+        if (userRequestDto.getPhoneNumber() != null)
+            existingUser.setPhoneNumber(userRequestDto.getPhoneNumber());
         return userRepository.save(existingUser);
     }
 
