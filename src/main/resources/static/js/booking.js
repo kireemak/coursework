@@ -2,11 +2,9 @@ document.getElementById('bookingForm')?.addEventListener('submit', async (event)
     event.preventDefault();
 
     const bookingData = {
-        user: { id: document.getElementById('userId').value },
-        car: { id: document.getElementById('carId').value },
+        carId: document.getElementById('carId').value,
         startDate: document.getElementById('startDate').value,
         endDate: document.getElementById('endDate').value,
-        status: "Created"
     };
 
     if (new Date(bookingData.endDate) <= new Date(bookingData.startDate)) {

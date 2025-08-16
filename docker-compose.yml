@@ -28,6 +28,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/car_booking
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234567
+      JWT_SECRET: 123idbjadflkgjasopi39pi90r8qeiq3peoe0riwkototpw48f9jzfku4w09fuaefjmlyzseu9dip
       SPRING_PROFILES_ACTIVE: docker
     restart: unless-stopped
 
