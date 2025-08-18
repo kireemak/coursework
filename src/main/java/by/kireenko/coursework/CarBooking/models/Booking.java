@@ -1,5 +1,6 @@
 package by.kireenko.coursework.CarBooking.models;
 
+import by.kireenko.coursework.CarBooking.dto.CreateBookingRequestDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

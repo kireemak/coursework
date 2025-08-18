@@ -1,13 +1,14 @@
 package by.kireenko.coursework.CarBooking.services;
 
 import by.kireenko.coursework.CarBooking.dto.BookingDto;
+import by.kireenko.coursework.CarBooking.dto.CreateBookingRequestDto;
+import by.kireenko.coursework.CarBooking.dto.UpdateBookingRequestDto;
 import by.kireenko.coursework.CarBooking.error.NotValidResourceState;
 import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Booking;
 import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.repositories.BookingRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -90,18 +90,22 @@ public class BookingService {
     }
 
     @Transactional(readOnly = false)
-    public Booking createBooking(Booking booking) {
+    public Booking createBooking(CreateBookingRequestDto bookingRequestDto) {
         User user = userService.getCurrentAuthenticatedUser();
+        Car car = carService.getCarById(bookingRequestDto.getCarId());
+
+        Booking booking = new Booking();
+        booking.setCar(car);
         booking.setUser(user);
-        if(booking.getStatus() == null) {
-            booking.setStatus("Created");
-        }
+        booking.setStartDate(bookingRequestDto.getStartDate());
+        booking.setEndDate(bookingRequestDto.getEndDate());
+        booking.setStatus("Created");
 
         return bookingRepository.save(booking);
     }
 
     @Transactional(readOnly = false)
-    public Booking updateBooking(Long id, Booking updatedBooking) {
+    public Booking updateBooking(Long id, UpdateBookingRequestDto updatedBookingRequest) {
         User user = userService.getCurrentAuthenticatedUser();
         Booking existingBooking = getBookingById(id);
 
@@ -115,16 +119,12 @@ public class BookingService {
             throw new IllegalStateException("Only bookings with status CREATED can be updated");
         }
 
-        if (updatedBooking.getStartDate() != null)
-            existingBooking.setStartDate(updatedBooking.getStartDate());
-        if (updatedBooking.getEndDate() != null)
-            existingBooking.setEndDate(updatedBooking.getEndDate());
-        if (updatedBooking.getStatus() != null)
-            existingBooking.setStatus(updatedBooking.getStatus());
-        if (updatedBooking.getCar() != null)
-            existingBooking.setCar(updatedBooking.getCar());
-        if (updatedBooking.getUser() != null)
-            existingBooking.setUser(updatedBooking.getUser());
+        if (updatedBookingRequest.getStartDate() != null)
+            existingBooking.setStartDate(updatedBookingRequest.getStartDate());
+        if (updatedBookingRequest.getEndDate() != null)
+            existingBooking.setEndDate(updatedBookingRequest.getEndDate());
+        if (updatedBookingRequest.getStatus() != null)
+            existingBooking.setStatus(updatedBookingRequest.getStatus());
 
         return bookingRepository.save(existingBooking);
     }
@@ -148,19 +148,18 @@ public class BookingService {
     }
 
     @Transactional(readOnly = false)
-    public Booking createBookingWithCheck(Booking booking) {
-        Car car = carService.getCarWithLockById(booking.getCar().getId());
+    public Booking createBookingWithCheck(CreateBookingRequestDto bookingRequestDto) {
+        Car car = carService.getCarWithLockById(bookingRequestDto.getCarId());
 
         if (!"Available".equalsIgnoreCase(car.getStatus())) {
             log.error("Attempt to book an unavailable car {}. Status was {}", car.getId(), car.getStatus());
             throw new NotValidResourceState("Car is not available for booking.");
         }
 
-        booking.setUser(userService.getCurrentAuthenticatedUser());
         car.setStatus("Rented");
         carService.updateCar(car.getId(), car);
 
-        return createBooking(booking);
+        return createBooking(bookingRequestDto);
     }
 
     @Transactional(readOnly = false)

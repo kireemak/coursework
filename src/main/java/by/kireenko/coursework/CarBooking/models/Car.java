@@ -25,10 +25,10 @@ public class Car {
     private String model;
 
     @Column(nullable = false)
-    private int year;
+    private Integer year;
 
     @Column(nullable = false)
-    private double rentalPrice;
+    private Double rentalPrice;
 
     @Column(nullable = false, length = 20)
     private String status;

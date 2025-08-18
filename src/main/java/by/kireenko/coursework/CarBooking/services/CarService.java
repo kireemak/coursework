@@ -1,6 +1,7 @@
 package by.kireenko.coursework.CarBooking.services;
 
 import by.kireenko.coursework.CarBooking.dto.CarDto;
+import by.kireenko.coursework.CarBooking.dto.CarRequestDto;
 import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.repositories.CarRepository;
@@ -52,18 +53,45 @@ public class CarService {
     }
 
     @Transactional(readOnly = false)
-    public Car createCar(Car car) {
+    public Car createCar(CarRequestDto carRequestDto) {
+        Car car = new Car();
+        car.setBrand(carRequestDto.getBrand());
+        car.setModel(carRequestDto.getModel());
+        car.setYear(carRequestDto.getYear());
+        car.setRentalPrice(carRequestDto.getRentalPrice());
+        car.setStatus(carRequestDto.getStatus());
         return carRepository.save(car);
     }
 
     @Transactional(readOnly = false)
-    public Car updateCar(Long id, Car updatedCar) {
+    public Car updateCar(Long id, CarRequestDto carRequestDto) {
         Car existingCar = getCarById(id);
-        existingCar.setBrand(updatedCar.getBrand());
-        existingCar.setModel(updatedCar.getModel());
-        existingCar.setYear(updatedCar.getYear());
-        existingCar.setRentalPrice(updatedCar.getRentalPrice());
-        existingCar.setStatus(updatedCar.getStatus());
+        if (carRequestDto.getBrand() != null)
+            existingCar.setBrand(carRequestDto.getBrand());
+        if (carRequestDto.getModel() != null)
+            existingCar.setModel(carRequestDto.getModel());
+        if (carRequestDto.getYear() != null)
+            existingCar.setYear(carRequestDto.getYear());
+        if (carRequestDto.getRentalPrice() != null)
+            existingCar.setRentalPrice(carRequestDto.getRentalPrice());
+        if (carRequestDto.getStatus() != null)
+            existingCar.setStatus(carRequestDto.getStatus());
+        return carRepository.save(existingCar);
+    }
+
+    @Transactional(readOnly = false)
+    public Car updateCar(Long id, Car updateCar) {
+        Car existingCar = getCarById(id);
+        if (updateCar.getBrand() != null)
+            existingCar.setBrand(updateCar.getBrand());
+        if (updateCar.getModel() != null)
+            existingCar.setModel(updateCar.getModel());
+        if (updateCar.getYear() != null)
+            existingCar.setYear(updateCar.getYear());
+        if (updateCar.getRentalPrice() != null)
+            existingCar.setRentalPrice(updateCar.getRentalPrice());
+        if (updateCar.getStatus() != null)
+            existingCar.setStatus(updateCar.getStatus());
         return carRepository.save(existingCar);
     }
 

@@ -17,19 +17,32 @@ services:
       retries: 5
     restart: unless-stopped
 
+  mongodb:
+    image: mongo:latest
+    container_name: mongo_container
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    restart: unless-stopped
+
   car-booking:
     build: .
     container_name: car-booking_container
     depends_on:
       - postgresql
+      - mongodb
     ports:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/car_booking
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234567
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/car_features
+      JWT_SECRET: 123idbjadflkgjasopi39pi90r8qeiq3peoe0riwkototpw48f9jzfku4w09fuaefjmlyzseu9dip
       SPRING_PROFILES_ACTIVE: docker
     restart: unless-stopped
 
 volumes:
   pgdata:
+  mongodata:
