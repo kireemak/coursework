@@ -7,6 +7,10 @@ import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.repositories.CarRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +23,12 @@ import java.util.List;
 public class CarService {
 
     private final CarRepository carRepository;
+    private final CarService self;
 
     @Autowired
-    public CarService(CarRepository carRepository) {
+    public CarService(CarRepository carRepository, @Lazy CarService self) {
         this.carRepository = carRepository;
+        this.self = self;
     }
 
     public List<Car> getAllCars() {
@@ -35,6 +41,7 @@ public class CarService {
         return carDtoList;
     }
 
+    @Cacheable(value = "cars", key = "#id")
     public Car getCarById(Long id) {
         return carRepository.findById(id)
                 .orElseThrow(() -> {
@@ -63,9 +70,10 @@ public class CarService {
         return carRepository.save(car);
     }
 
+    @CachePut(value = "cars", key = "#id")
     @Transactional(readOnly = false)
     public Car updateCar(Long id, CarRequestDto carRequestDto) {
-        Car existingCar = getCarById(id);
+        Car existingCar = self.getCarById(id);
         if (carRequestDto.getBrand() != null)
             existingCar.setBrand(carRequestDto.getBrand());
         if (carRequestDto.getModel() != null)
@@ -79,9 +87,10 @@ public class CarService {
         return carRepository.save(existingCar);
     }
 
+    @CachePut(value = "cars", key = "#id")
     @Transactional(readOnly = false)
     public Car updateCar(Long id, Car updateCar) {
-        Car existingCar = getCarById(id);
+        Car existingCar = self.getCarById(id);
         if (updateCar.getBrand() != null)
             existingCar.setBrand(updateCar.getBrand());
         if (updateCar.getModel() != null)
@@ -95,13 +104,14 @@ public class CarService {
         return carRepository.save(existingCar);
     }
 
+    @CacheEvict(value = "cars", key = "#id")
     @Transactional(readOnly = false)
     public void deleteCar(Long id) {
         carRepository.deleteById(id);
     }
 
     public boolean isCarAvailable(Long carId) {
-        Car car = getCarById(carId);
+        Car car = self.getCarById(carId);
         return "Available".equalsIgnoreCase(car.getStatus());
     }
 

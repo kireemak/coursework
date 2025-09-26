@@ -4,12 +4,13 @@ import jakarta.persistence.Id;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 @Data
 @Document(collection = "car_details")
-public class CarDetails {
+public class CarDetails implements Serializable {
     @Id
     private String id;
 

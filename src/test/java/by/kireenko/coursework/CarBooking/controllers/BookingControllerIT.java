@@ -42,7 +42,6 @@ public class BookingControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getBookingById_WhenBookingExistsAndUserIsOwner_ShouldReturnBooking() throws Exception {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -55,7 +54,6 @@ public class BookingControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase =Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getBookingById_WhenBookingExistsAndWithoutToken_ShouldThrowException() throws Exception {
         mockMvc.perform(get("/api/bookings/{id}", 999999))
                 .andExpect(status().isUnauthorized());
@@ -63,7 +61,6 @@ public class BookingControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase =Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getBookingById_WhenBookingExistsAndUserIsNotOwner_ShouldThrowException() throws Exception {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername("testName2");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -75,7 +72,6 @@ public class BookingControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase =Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getBookingById_WhenBookingNotFound_ShouldThrowException() throws Exception {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -87,7 +83,6 @@ public class BookingControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase =Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void createBookingWithCheck_WhenCarIsAvailable_ShouldReturnBooking() throws Exception {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -107,7 +102,6 @@ public class BookingControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase =Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void updateBooking_WhenUserIsOwner_ShouldReturnBooking() throws Exception {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -131,7 +125,6 @@ public class BookingControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase =Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void deleteBooking_WhenUserIsOwner() throws Exception {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);

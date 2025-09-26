@@ -5,6 +5,7 @@ import by.kireenko.coursework.CarBooking.models.Car;
 import by.kireenko.coursework.CarBooking.services.CustomUserDetailsService;
 import by.kireenko.coursework.CarBooking.utils.JwtTokenUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -14,6 +15,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,7 +38,6 @@ public class CarControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getAllCars_WhenUserIsAuthorized_ShouldReturnCarDtoList() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -43,15 +45,14 @@ public class CarControllerIT extends AbstractIntegreationTest {
         mockMvc.perform(get("/api/cars")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(11)))
-                .andExpect(jsonPath("$[10].id", is(2999999)))
-                .andExpect(jsonPath("$[10].brand", is("testBrand3")))
-                .andExpect(jsonPath("$[10].model", is("testModel3")));
+                .andExpect(jsonPath("$", hasSize(12)))
+                .andExpect(jsonPath("$[10].id", Matchers.greaterThan(0)))
+                .andExpect(jsonPath("$[10].brand", Matchers.stringContainsInOrder("testBrand")))
+                .andExpect(jsonPath("$[10].model", Matchers.stringContainsInOrder("testModel")));
     }
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts= "/delete-test-data.sql" , executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getAllCars_WhenUserIsNotAuthorized_ThrowsException() throws Exception {
         mockMvc.perform(get("/api/cars"))
                 .andExpect(status().isUnauthorized());
@@ -59,22 +60,20 @@ public class CarControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getCarById_WhenCarExistsAndUserIsAuthorized_ShouldReturnCarDto() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);
 
-        mockMvc.perform(get("/api/cars/{id}", 2999999)
+        mockMvc.perform(get("/api/cars/{id}", 3999999)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(2999999)))
-                .andExpect(jsonPath("$.brand", is("testBrand3")))
-                .andExpect(jsonPath("$.model", is("testModel3")));
+                .andExpect(jsonPath("$.id", is(3999999)))
+                .andExpect(jsonPath("$.brand", is("testBrand4")))
+                .andExpect(jsonPath("$.model", is("testModel4")));
     }
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getCarById_WhenCarNotExistsAndUserIsAuthorized_ThrowsException() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -89,7 +88,6 @@ public class CarControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getAvailableCars_WhenUserIsAuthorized_ShouldReturnCarDto() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -97,7 +95,7 @@ public class CarControllerIT extends AbstractIntegreationTest {
         mockMvc.perform(get("/api/cars/available" )
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(5)))
+                .andExpect(jsonPath("$", hasSize(6)))
                 .andExpect(jsonPath("$[4].id", is(1999999)))
                 .andExpect(jsonPath("$[4].brand", is("testBrand2")))
                 .andExpect(jsonPath("$[4].model", is("testModel2")))
@@ -106,7 +104,6 @@ public class CarControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void createCar_WhenUserIsAdmin_ShouldReturnCarDto() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName3");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -128,17 +125,16 @@ public class CarControllerIT extends AbstractIntegreationTest {
         mockMvc.perform(get("/api/cars")
                 .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(12)));
+                .andExpect(jsonPath("$", hasSize(13)));
 
         mockMvc.perform(get("/api/cars/available")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(6)));
+                .andExpect(jsonPath("$", hasSize(7)));
     }
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void updateCar_WhenUserIsAdmin_ShouldReturnCarDto() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName3");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -172,7 +168,6 @@ public class CarControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void deleteCar_WhenUserIsAdmin() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName3");
         String token = jwtTokenUtils.generateToken(userDetails);

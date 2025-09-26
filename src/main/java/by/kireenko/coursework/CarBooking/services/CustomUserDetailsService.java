@@ -40,22 +40,23 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public User createNewUser(RegistrationUserDto registrationUserDto) {
-        User user = new User();
-        user.setName(registrationUserDto.getName());
-        user.setPassword(registrationUserDto.getPassword());
-        user.setEmail(registrationUserDto.getEmail());
-        user.setPhoneNumber(registrationUserDto.getPhone());
+        User user = userFieldsInit(registrationUserDto);
         user.setRoles(List.of(roleService.getUserRole()));
         return userService.createUser(user);
     }
 
     public User createNewAdmin(RegistrationUserDto registrationUserDto) {
+        User user = userFieldsInit(registrationUserDto);
+        user.setRoles(List.of(roleService.getAdminRole()));
+        return userService.createUser(user);
+    }
+
+    private User userFieldsInit(RegistrationUserDto registrationUserDto) {
         User user = new User();
         user.setName(registrationUserDto.getName());
         user.setPassword(registrationUserDto.getPassword());
         user.setEmail(registrationUserDto.getEmail());
         user.setPhoneNumber(registrationUserDto.getPhone());
-        user.setRoles(List.of(roleService.getAdminRole()));
-        return userService.createUser(user);
+        return user;
     }
 }

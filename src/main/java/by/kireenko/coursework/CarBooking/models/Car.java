@@ -3,6 +3,8 @@ package by.kireenko.coursework.CarBooking.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
+
 @Entity
 @Getter
 @Setter
@@ -11,7 +13,7 @@ import lombok.*;
 @ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "cars")
-public class Car {
+public class Car implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

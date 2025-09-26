@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenUtils {
 
-    @Value("${jwt.secret}")
+    @Value("${JWT_SECRET}")
     private String secret;
     private final Duration jwtLifetime = Duration.ofMinutes(30);
 

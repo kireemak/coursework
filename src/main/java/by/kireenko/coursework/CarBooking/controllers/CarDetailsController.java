@@ -5,6 +5,7 @@ import by.kireenko.coursework.CarBooking.dto.CarDetailsDto;
 import by.kireenko.coursework.CarBooking.models.CarDetails;
 import by.kireenko.coursework.CarBooking.services.CarDetailsService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("api/cars/{carId}/details")
 @Tag(name = "Car Details Controller", description = "Endpoints for car features and reviews (MongoDB)")
+@SecurityRequirement(name="bearerAuth")
 public class CarDetailsController {
     private final CarDetailsService carDetailsService;
 

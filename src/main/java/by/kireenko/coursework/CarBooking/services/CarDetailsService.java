@@ -8,6 +8,14 @@ import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.repositories.CarDetailsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,8 +29,10 @@ public class CarDetailsService {
     private final CarDetailsRepository carDetailsRepository;
     private final CarService carService;
     private final UserService userService;
+    private final MongoTemplate mongoTemplate;
 
     @Transactional(readOnly = true)
+    @Cacheable(value = "cars_details", key = "#carId")
     public CarDetails getDetailsByCarId(Long carId) {
         carService.getCarById(carId);
         return carDetailsRepository.findByCarId(carId).orElseGet(
@@ -35,6 +45,7 @@ public class CarDetailsService {
     }
 
     @Transactional
+    @CachePut(value = "cars_details", key = "#carId")
     public CarDetails saveDetails(Long carId, CarDetailsDto detailsDto) {
         carService.getCarById(carId);
 
@@ -51,23 +62,24 @@ public class CarDetailsService {
     }
 
     @Transactional
+    @CachePut(value = "cars_details", key = "#carId")
     public CarDetails addReview(Long carId, AddReviewRequestDto reviewDto) {
         carService.getCarById(carId);
         User currentUser = userService.getCurrentAuthenticatedUser();
 
-        CarDetails carDetails = getDetailsByCarId(carId);
-
         CarDetails.Review newReview = new CarDetails.Review();
-
         newReview.setUsername(currentUser.getName());
         newReview.setComment(reviewDto.getComment());
         newReview.setRating(reviewDto.getRating());
 
-        if (carDetails.getReviews() == null) {
-            carDetails.setReviews(new ArrayList<>());
-        }
-        carDetails.getReviews().add(newReview);
+        Query query = new Query(Criteria.where("carId").is(carId));
 
-        return carDetailsRepository.save(carDetails);
+        Update update = new Update()
+                .push("reviews", newReview)
+                .setOnInsert("carId", carId);
+
+        FindAndModifyOptions options = new FindAndModifyOptions().returnNew(true).upsert(true);
+
+        return mongoTemplate.findAndModify(query, update, options, CarDetails.class);
     }
 }

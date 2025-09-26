@@ -17,6 +17,13 @@ services:
       retries: 5
     restart: unless-stopped
 
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
   mongodb:
     image: mongo:latest
     container_name: mongo_container
@@ -26,12 +33,39 @@ services:
       - mongodata:/data/db
     restart: unless-stopped
 
+  vault:
+    image: hashicorp/vault:latest
+    container_name: vault_container
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: "my-root-token"
+      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+    cap_add:
+      - IPC_LOCK
+
+  vault-setup:
+    image: hashicorp/vault:latest
+    container_name: vault_setup_container
+    depends_on:
+      vault:
+        condition: service_started
+    volumes:
+      - ./vault-config:/vault-config
+    entrypoint: /bin/sh -c "/vault-config/setup-vault.sh"
+
   car-booking:
     build: .
-    container_name: car-booking_container
+    container_name: car_booking_container
     depends_on:
-      - postgresql
-      - mongodb
+      postgresql:
+        condition: service_started
+      mongodb:
+        condition: service_started
+      vault-setup:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
     ports:
       - "8080:8080"
     environment:
@@ -39,8 +73,10 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: 1234567
       SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/car_features
-      JWT_SECRET: 123idbjadflkgjasopi39pi90r8qeiq3peoe0riwkototpw48f9jzfku4w09fuaefjmlyzseu9dip
+      SPRING_CLOUD_VAULT_URI: http://vault:8200
+      SPRING_CLOUD_VAULT_TOKEN: my-root-token
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATA_REDIS_HOST: redis
     restart: unless-stopped
 
 volumes:

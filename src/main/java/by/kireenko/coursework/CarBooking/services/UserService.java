@@ -6,8 +6,13 @@ import by.kireenko.coursework.CarBooking.error.ResourceNotFoundException;
 import by.kireenko.coursework.CarBooking.models.Booking;
 import by.kireenko.coursework.CarBooking.models.User;
 import by.kireenko.coursework.CarBooking.repositories.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,11 +24,18 @@ import java.util.*;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserService self;
+
+    @Autowired
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, @Lazy UserService self) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.self = self;
+    }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -35,6 +47,7 @@ public class UserService {
         return dtoList;
     }
 
+    @Cacheable(value = "users", key = "#name")
     public User getUserByName(String name) {
         return userRepository.findByName(name).orElseThrow(() -> {
             log.warn("User with name {} not found", name);
@@ -42,6 +55,7 @@ public class UserService {
         });
     }
 
+    @Cacheable(value = "users", key = "#id")
     public User getUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> {
@@ -57,8 +71,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = false)
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "users", key = "#root.target.getUserById(#userId).name", beforeInvocation = true)
+            },
+            put = {
+                    @CachePut(value = "users", key = "#result.id"),
+                    @CachePut(value = "users", key = "#result.name")
+            }
+    )
     public User updateUser(Long userId, UpdateUserRequestDto userRequestDto) {
-        User existingUser = getUserById(userId);
+        User existingUser = self.getUserById(userId);
         if (userRequestDto.getName() != null)
             existingUser.setName(userRequestDto.getName());
         if (userRequestDto.getEmail() != null)
@@ -69,6 +92,12 @@ public class UserService {
     }
 
     @Transactional(readOnly = false)
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "users", key = "#id", beforeInvocation = true),
+                    @CacheEvict(value = "users", key = "#root.target.getUserById(#id).name", beforeInvocation = true)
+            }
+    )
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
@@ -76,12 +105,11 @@ public class UserService {
     public User getCurrentAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        return userRepository.findByName(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return self.getUserByName(username);
     }
 
     public List<Booking> getCurrentUserBookingList(User user) {
-        User currUser = getUserById(user.getId());
+        User currUser = self.getUserById(user.getId());
         return currUser.getBookings();
     }
 }
