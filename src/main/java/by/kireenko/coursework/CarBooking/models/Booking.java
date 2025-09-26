@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 
@@ -16,7 +17,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @ToString(exclude = {"car", "user"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Booking {
+public class Booking implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

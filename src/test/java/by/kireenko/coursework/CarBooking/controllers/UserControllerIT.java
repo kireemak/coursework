@@ -40,7 +40,6 @@ public class UserControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getAllUsers_WhenClientIsAdmin_ShouldReturnAllUserDtoList() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName3");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -48,12 +47,11 @@ public class UserControllerIT extends AbstractIntegreationTest {
         mockMvc.perform(get("/api/users")
                 .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(13)));
+                .andExpect(jsonPath("$", hasSize(14)));
     }
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts= "/delete-test-data.sql" , executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getAllUsers_WhenClientIsNotAuthorized_ThrowsException() throws Exception {
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isUnauthorized());
@@ -61,7 +59,6 @@ public class UserControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getUserById_WhenUserExistsAndClientIsAdmin_ShouldReturnUserDto() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName3");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -77,7 +74,6 @@ public class UserControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void getUserById_WhenUserNotExistsAndClientIsAdmin_ThrowsException() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName3");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -92,7 +88,6 @@ public class UserControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void createUser_WhenClientIsAdmin_ShouldReturnUserDto() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName3");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -114,12 +109,11 @@ public class UserControllerIT extends AbstractIntegreationTest {
         mockMvc.perform(get("/api/users")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(14)));
+                .andExpect(jsonPath("$", hasSize(15)));
     }
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void updateUser_WhenClientIsAdmin_ShouldReturnUserDto() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName3");
         String token = jwtTokenUtils.generateToken(userDetails);
@@ -145,16 +139,15 @@ public class UserControllerIT extends AbstractIntegreationTest {
 
     @Test
     @Sql(scripts = "/insert-booking.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(scripts = "/delete-test-data.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     public void deleteUser_WhenClientIsAdmin() throws Exception {
         UserDetails userDetails = userDetailsService.loadUserByUsername("testName3");
         String token = jwtTokenUtils.generateToken(userDetails);
 
-        mockMvc.perform(delete("/api/users/{id}", 2999999)
+        mockMvc.perform(delete("/api/users/{id}", 3999999)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/users/{id}", 2999999)
+        mockMvc.perform(get("/api/users/{id}", 3999999)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound());
     }

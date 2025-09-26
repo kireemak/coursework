@@ -36,5 +36,12 @@ public class CarDetailsDto {
         this.description = carDetails.getDescription();
         this.features = carDetails.getFeatures();
         this.reviews = new ArrayList<>();
+        carDetails.getReviews().forEach(review -> {
+            ReviewDto reviewDto = new ReviewDto();
+            reviewDto.setUsername(review.getUsername());
+            reviewDto.setRating(review.getRating());
+            reviewDto.setComment(review.getComment());
+            this.reviews.add(reviewDto);
+        });
     }
 }
